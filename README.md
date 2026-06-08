@@ -132,9 +132,17 @@ ComfyUI). The node appears under the **Stat-Imp/Deforum** menu group.
 
 ## Credits
 
-- Camera math ported from **Deforum** (`deforum-stable-diffusion`,
-  `transform_image_3d`).
-- Projection conventions follow **py3d_tools** (BSD).
-- Color coherence is a clean-room pure-torch reimplementation of Deforum's
-  `maintain_colors` (`helpers/colors.py`) — quantile histogram match, no skimage/cv2.
-- This wrapper and pure-torch reimplementation: MIT (see `LICENSE`).
+This pack stands on the original **Deforum** work — full credit to its authors:
+
+- **[Deforum (Stable Diffusion)](https://github.com/deforum/deforum-stable-diffusion)**
+  — the original animation engine. The camera math here is a forward port of its
+  `transform_image_3d`, and the color matcher is a clean-room reimplementation of
+  its `maintain_colors` (`helpers/colors.py`).
+- **[Deforum ComfyUI nodes](https://github.com/deforum/deforum-comfy-nodes)**
+  — the ComfyUI harness (ForLoop, schedules, Set/Get bus) these nodes plug into.
+- **[py3d_tools](https://github.com/facebookresearch/pytorch3d)** (BSD) — projection
+  conventions; py3d_tools is a stripped subset of PyTorch3D.
+
+Camera geometry is ported **exactly**; color coherence is a pure-torch
+reimplementation (quantile histogram match, no skimage/cv2). This wrapper and the
+pure-torch reimplementations are **MIT** (see `LICENSE`).
