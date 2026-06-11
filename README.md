@@ -42,9 +42,3 @@ This pack stands on the original **Deforum** work — full credit to its authors
   its `maintain_colors` (`helpers/colors.py`).
 - **[Deforum-Comfy-Nodes](https://github.com/deforum/deforum-comfy-nodes)**
   — the main ComfyUI Deforum harness and node pack (ForLoop, schedules, Set/Get bus).
-- **[py3d_tools](https://github.com/facebookresearch/pytorch3d)** (BSD) — projection
-  conventions; py3d_tools is a stripped subset of PyTorch3D.
-
-Camera geometry is ported exactly; color coherence is a pure-torch
-reimplementation (quantile histogram match, no skimage/cv2). This wrapper and the
-pure-torch reimplementations are **MIT** (see `LICENSE`).
