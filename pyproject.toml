@@ -1,12 +1,12 @@
 [project]
 name = "comfyui-stat-imp-nodes"
-description = "Clean pure-torch Deforum-style nodes for ComfyUI animation loops: an exact-Deforum depth-aware 3D camera warp (pixel-identical to transform_image_3d) plus LAB/EMA color-coherence nodes that stop feedback-loop color drift."
-version = "0.2.0"
+description = "Clean pure-torch Deforum-style nodes for ComfyUI animation loops: an exact-Deforum depth-aware 3D camera warp (pixel-identical to transform_image_3d), LAB/EMA color-coherence nodes that stop feedback-loop color drift, a vanilla-semantics cadence node, and an optical-flow estimator."
+version = "0.3.0"
 license = { text = "MIT" }
 dependencies = []
 
 [project.urls]
-Repository = "https://github.com/GITHUB_HANDLE/comfyui-Stat-Imp-nodes"
+Repository = "https://github.com/Statistical-Impossibility/comfyui-Stat-Imp-nodes"
 
 [tool.comfy]
 PublisherId = "PUBLISHER_ID"

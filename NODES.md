@@ -125,3 +125,75 @@ independent; at `strength 0` the node is a pass-through.
   richer image as the bootstrap/reference and the whole loop inherits its colors.
 - `preserve_luminance` keeps brightness, so this node controls **color only**; it
   will not stop a loop that is darkening on its own (that's a denoise/luminance issue).
+
+---
+
+## `Cadence`
+
+Menu group: **Stat-Imp / Deforum**.
+
+Vanilla-Deforum **cadence**: only diffuse every *N*th frame, and fill the in-betweens
+("tweens") by warping the two image lineages along the motion schedule and cross-dissolving
+them. This is the classic Deforum speed/smoothness trick — at `cadence = N` the expensive
+sampler runs *N×* fewer times. `cadence = 1` is a mathematical no-op (every frame is a gen
+frame), so it's safe to leave wired.
+
+It consolidates the scalar math + switch/blend logic of the old multi-node CADENCE group into
+one node. The actual warps stay **outside** the node (so any transform can feed it — 3D depth
+warp today, optical flow tomorrow), and the sampler gate stays graph-level; this node only does
+the dissolve math and emits a boolean telling the graph which kind of frame this is.
+
+> This is a **loop-internal** node: its scalar inputs come from the Deforum harness
+> (`loop_index`, `num_frames`) and a cadence knob, not from hand-typed widgets. It has **zero
+> widgets** by design (every input is `forceInput`), which makes the frontend widget-serialization
+> trap impossible. Use the example workflow's wiring as the reference.
+
+### Inputs (required)
+- `loop_index` (INT) — current frame index from the `ForLoop`.
+- `cadence` (INT) — diffuse every *N*th frame (`1` = off / every frame).
+- `num_frames` (INT) — total frames (for the tail divisor, so the last fade completes on the final frame).
+- `is_start` (BOOLEAN) — true on the loop's first iteration (bootstrap).
+- `warped_old` (IMAGE, *lazy*) — the previous anchor lineage, warped along the schedule. Only pulled on **tween** frames.
+- `corrected` (IMAGE, *lazy*) — the current warped+color-corrected frame.
+- `fresh` (IMAGE, *lazy*) — the freshly diffused image. Only pulled on **gen** frames (so the sampler is skipped on tweens).
+
+### Inputs (optional — A2 v2 optical-flow morph)
+- `flow` (FLOW) — displacement field from **Compute Optical Flow** below. Leave unconnected for the plain v1 dissolve (bit-identical).
+- `flow_factor` (FLOAT, 0–1) — how far to morph the lineages into alignment before dissolving (tween frames only).
+
+### Outputs
+- `frame` (IMAGE) — the emitted frame (a dissolve on tweens, the fresh diffusion on gen frames).
+- `next_anchor` (IMAGE) — the anchor lineage to carry to the next iteration (wire to `ForLoopClose`).
+- `is_gen` (BOOLEAN) — true on gen frames; drives the graph-level sampler gate.
+
+> Key (counter-intuitive, but vanilla-identical) semantic: new diffused content arrives **≤N
+> frames after** its schedule index — it fades in across the *following* span, not instantly.
+
+---
+
+## `Compute Optical Flow`
+
+Menu group: **Stat-Imp / Deforum**.
+
+Estimates an **optical-flow** field (per-pixel displacement) between two frames, to feed the
+`Cadence` node's `flow` input for motion-aware in-betweens. Kept as a separate node so the flow
+backend is swappable (and a ground-truth Blender motion-vector pass could replace it later).
+
+### Inputs
+- `image_from` (IMAGE) — source frame.
+- `image_to` (IMAGE) — target frame. Output flow maps `image_from → image_to`, sized to `image_to`.
+- `method` — `None` (zero flow = identity, ≡ cadence v1), `RAFT`, `DIS Medium`, `DIS Fine`, `Farneback`.
+- `device` — `AUTO` / `cuda` / `cpu` (only affects RAFT).
+
+### Outputs
+- `flow` (FLOW) — `(1, H, W, 2)` displacement field; wire into `Cadence` → `flow`.
+
+### Backends & dependencies
+- `DIS Medium` / `DIS Fine` / `Farneback` — **OpenCV** (`cv2`), CPU. OpenCV is usually already
+  bundled with ComfyUI.
+- `RAFT` — **torchvision** (weights auto-download on first use), GPU or CPU.
+- `None` — no dependency; returns identity flow.
+
+> Practical note: flow-based morphing shines on **clean, high-quality frames**. On heavily
+> distilled / low-step models the per-frame texture noise can make estimated flow noisy; in that
+> regime `None` (plain dissolve) or `Farneback`/`DIS` are safer than `RAFT`.
