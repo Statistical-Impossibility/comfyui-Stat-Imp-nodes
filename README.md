@@ -17,12 +17,12 @@ per-node reference (inputs, outputs, motion directions, tuning guidance).
 ## Requirements
 
 1. **A working ComfyUI install.** If you don't have one yet, get it from the official site /
-   repo first: **https://github.com/comfyanonymous/ComfyUI** (follow its install guide).
+   repo first: **https://github.com/comfy-org/comfyui** (follow its install guide).
 2. **The Deforum harness — our fork.** The example workflow runs inside a Deforum
    `ForLoop` animation loop. It needs the harness nodes (ForLoop, ValueSchedule, Set/Get bus),
    and specifically **our fork** of `deforum-comfy-nodes`, which widens the loop's carry state
    (10 `value` sockets instead of 1) and fixes the value-schedule formula parser so `sin/cos`
-   and multi-argument functions work. Install **our fork**, not the upstream:
+   and multi-argument functions work. Install the fork:
    **https://github.com/Statistical-Impossibility/deforum-comfy-nodes**
    (See *"Why a fork"* below.) The five nodes in *this* pack work standalone, but the shipped
    example workflow assumes the fork.
